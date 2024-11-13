@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Form</title>
+</head>
+
+<body>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
+
+    :root {
+      --header-height: 3rem;
+      --font-semi: 600;
+      /*===== Colores =====*/
+      /*Purple 260 - Red 355 - Blue 224 - Pink 340*/
+      /* HSL color mode */
+      --hue-color: 224;
+      --first-color: hsl(var(--hue-color), 89%, 60%);
+      --second-color: hsl(var(--hue-color), 56%, 12%);
+      /*===== Fuente y tipografia =====*/
+      --body-font: "Poppins", sans-serif;
+      --big-font-size: 2rem;
+      --h2-font-size: 1.25rem;
+      --normal-font-size: .938rem;
+      --smaller-font-size: .75rem;
+      /*===== Margenes =====*/
+      --mb-2: 1rem;
+      --mb-4: 2rem;
+      --mb-5: 2.5rem;
+      --mb-6: 3rem;
+      /*===== z index =====*/
+      --z-back: -10;
+      --z-fixed: 100;
+    }
+
+    .section-title {
+      position: relative;
+      font-size: var(--h2-font-size);
+      color: var(--first-color);
+      margin-top: var(--mb-2);
+      margin-bottom: var(--mb-4);
+      text-align: center;
+    }
+
+    .section-title::after {
+      position: absolute;
+      content: "";
+      width: 64px;
+      height: 0.18rem;
+      left: 0;
+      right: 0;
+      margin: auto;
+      top: 2rem;
+      background-color: var(--first-color);
+    }
+
+    .section {
+      padding-top: 3rem;
+      padding-bottom: 2rem;
+    }
+
+    .footer__social {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .bd-grid {
+      max-width: 1024px;
+      display: grid;
+      margin-left: var(--mb-2);
+      margin-right: var(--mb-2);
+    }
+
+    .footer__icon {
+      font-size: 1.5rem;
+      color: #fff;
+      margin: 0 1rem;
+    }
+
+    .footer {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    body {
+      margin: var(--header-height) 0 0 0;
+      font-family: var(--body-font);
+      font-size: var(--normal-font-size);
+      color: var(--second-color);
+      --sb-track-color: hsl(224, 56%, 12%);
+      --sb-thumb-color: hsl(224, 89%, 60%);
+      --sb-size: 7px;
+    }
+
+    h1 {
+      margin: 0;
+    }
+
+    .contact__input {
+      width: 100%;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      border: 1.5px solid hsl(224, 56%, 12%);
+      outline: none;
+      margin-bottom: 2rem;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background-color: var(--first-color);
+      color: #fff;
+      padding: 0.75rem 2.5rem;
+      font-weight: var(--font-semi);
+      border-radius: 0.5rem;
+      transition: 0.3s;
+    }
+
+    .button:hover {
+      box-shadow: 0px 10px 36px rgba(0, 0, 0, 0.15);
+    }
+
+    .cta-button:hover {
+      filter: brightness(0.8);
+    }
+
+    .section-title {
+      position: relative;
+      font-size: var(--h2-font-size);
+      color: var(--first-color);
+      margin-top: var(--mb-2);
+      margin-bottom: var(--mb-4);
+      text-align: center;
+    }
+
+    .section-title::after {
+      position: absolute;
+      content: "";
+      width: 64px;
+      height: 0.18rem;
+      left: 0;
+      right: 0;
+      margin: auto;
+      top: 2rem;
+      background-color: var(--first-color);
+    }
+  </style>
+  <section class="contact section" id="contact"></section>
+  <h2 class="section-title">Contact</h2>
+  <div className="contact__container bd-grid">
+
+    <form id="contact-form">
+      <input type="text" id="name" placeholder="Name" class="contact__input" required>
+      <input type="email" id="email" placeholder="Email" class="contact__input" required>
+      <textarea id="message" placeholder="Message" rows="10" class="contact__input" required></textarea>
+
+      <button type="submit" class="cta-button">Send</button>
+    </form>
+  </div>
+  </section>
+
+  <div id="status-message"></div> <!-- Display success/error messages -->
+
+  <script>
+    document.getElementById('contact-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      // Get the form data
+      const formData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        message: document.getElementById('message').value,
+      };
+
+      // Ensure all fields are filled
+      if (!formData.name || !formData.email || !formData.message) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const bearerToken = 'Black-Swordsman'; // This should match AUTH_TOKEN in .env
+
+      try {
+        const response = await fetch('http://localhost:3000/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${bearerToken}`,
+          },
+          body: JSON.stringify(formData),
+        });
+
+        // Handle response
+        if (response.ok) {
+          document.getElementById('status-message').textContent = 'Email sent successfully!';
+          document.getElementById('contact-form').reset(); // Clear the form after success
+        } else {
+          const errorData = await response.json();
+          document.getElementById('status-message').textContent = 'Failed to send email: ' + errorData.error;
+        }
+      } catch (error) {
+        document.getElementById('status-message').textContent = 'An error occurred: ' + error.message;
+      }
+    });
+  </script>
+
+  <div class="footer">
+    <p>If you have any questions, feel free to reach out to me.</p>
+    <div class="footer__social">
+      <a href="https://www.facebook.com/Sibikrish3000" class="footer__icon"><img
+          src="https://img.icons8.com/?size=40&id=118497&format=png&color=000000" alt="Facebook" /></a>
+      <a href="https://www.instagram.com/wasperversa_302/" class="footer__icon"><img
+          src="https://img.icons8.com/?size=40&id=32323&format=png&color=000000" alt="Instagram" /></a>
+      <a href="https://twitter.com/sibikrish3000" class="footer__icon"><img
+          src="https://img.icons8.com/?size=38&id=phOKFKYpe00C&format=png&color=000000" alt="Twitter" /></a>
+    </div>
+    <p>&copy; Sibikrish. All rigths reserved ${new Date().getFullYear()}</p>
+  </div>
+</body>
+
+</html>
